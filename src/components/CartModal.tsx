@@ -9,7 +9,7 @@ const CartModal = () => {
       {cartEmpty ? (
         <div>The cart is empty</div>
       ) : (
-        <div className="flex flex-col gap-2 text-base w-max">
+        <div className="flex flex-col gap-2 text-base w-max bg-white p-4 rounded-md">
           <h1 className="text-xl font-bold">Shopping Cart</h1>
 
           <div className="flex  justify-between items-center">
