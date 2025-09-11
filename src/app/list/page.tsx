@@ -1,12 +1,53 @@
+import Card from "@/components/Card";
+import Filter from "@/components/Filter";
 import Image from "next/image";
 import Link from "next/link";
+
+const products = [
+  {
+    id: 1,
+    name: "Classic White Sneakers",
+    price: 2499,
+    description: "Versatile and stylish sneakers perfect for everyday wear.",
+    img: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 2,
+    name: "UltraSlim Laptop 14”",
+    price: 59999,
+    description: "Lightweight laptop with high performance for work and play.",
+    img: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 3,
+    name: "SmartFit Pro Watch",
+    price: 6999,
+    description: "Feature-packed smartwatch with health and fitness tracking.",
+    img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 4,
+    name: "Noise-Cancelling Headphones",
+    price: 2999,
+    description:
+      "Experience immersive sound quality and active noise cancellation.",
+    img: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 5,
+    name: "Eco-Friendly Water Bottle",
+    price: 499,
+    description: "Reusable and stylish bottle to keep you hydrated all day.",
+    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
+  },
+];
 
 const ListPage = () => {
   return (
     <div className="px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64">
       {/* CAMPAIGN */}
       <div className="flex bg-purple-100 p-2 md:p-4 xl:p-6">
-        <div className="w-2/3 flex flex-col gap-2 justify-between">
+        <div className="w-2/3 flex flex-col gap-2 justify-between ">
           <p className="text-2xl md:text-4xl  font-semibold">
             Biggest off on biggest products
           </p>
@@ -17,72 +58,29 @@ const ListPage = () => {
           </Link>
         </div>
         <div className="relative w-1/3 flex justify-center items-center">
-          <Image src="/woman.png" alt="" width={100} height={100} />
+          <Image src="/woman.png" alt="" fill className="object-contain" />
         </div>
       </div>
       {/* FILTER */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center">
-        <div className="grid grid-cols-3  lg:grid-cols-4  gap-4 mt-3">
-          <div className="p-1 bg-gray-200 rounded-full text-center">
-            <select
-              id=""
-              name=""
-              className="bg-transparent border-none outline-none w-full"
-            >
-              <option value="">Apple</option>
-              <option value="">Banana</option>
-              <option value="">Orange</option>
-              <option value="">Grape</option>
-            </select>
-          </div>
+      <Filter />
 
-          <div className="p-1 bg-gray-200 rounded-full text-center ">
-            <select
-              id=""
-              name=""
-              className="bg-transparent border-none outline-none w-full"
-            >
-              <option value="">Apple</option>
-              <option value="">Banana</option>
-              <option value="">Orange</option>
-              <option value="">Grape</option>
-            </select>
-          </div>
-          <div className="p-1 bg-gray-200 rounded-full text-center ">
-            <select
-              id=""
-              name=""
-              className="bg-transparent border-none outline-none w-full"
-            >
-              <option value="">Apple</option>
-              <option value="">Banana</option>
-              <option value="">Orange</option>
-              <option value="">Grape</option>
-            </select>
-          </div>
+      <div className="flex flex-col gap-4 mt-8">
+        <div>
+          <h2 className="text-xl font-semibold">All Products For You</h2>
         </div>
-        <div className="flex gap-2 mt-4">
-          <input
-            type="text"
-            name=""
-            id=""
-            placeholder="min price"
-            className="w-1/2 p-1 bg-transparent rounded-full text-center border border-black"
-          />
-          <input
-            type="text"
-            name=""
-            id=""
-            placeholder="max price"
-            className="w-1/2 p-1 bg-transparent rounded-full text-center border border-black"
-          />
-          <button className="p-1 lg:p-2 md:rounded-md  text-white bg-red-500 rounded-sm">
-            APPLY
-          </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {products &&
+            products.map((product, index) => (
+              <Card
+                key={index}
+                title={product.name}
+                desc={product.description}
+                price={product.price}
+                img={product.img}
+              />
+            ))}
         </div>
       </div>
-
-      <div></div>
     </div>
   );
 };
