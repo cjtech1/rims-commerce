@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Router } from "next/router";
 import { useState } from "react";
@@ -29,7 +30,7 @@ const SearchBar = () => {
         onChange={(e) => setSearchValue(e.target.value)}
       />
       <button type="submit">
-        <img src="./search.png" alt="" width={16} height={16} />
+        <Image src="/search.png" alt="" width={16} height={16} />
       </button>
     </form>
   );

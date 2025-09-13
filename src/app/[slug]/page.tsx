@@ -11,8 +11,8 @@ const SinglePage = () => {
         </div>
         {/* Text */}
         <div className="w-full lg:w-1/2 flex-col gap-6">
-          <h1 className="text-4xl font-medium">Product Name</h1>
-          <p className="text-gray-500">
+          <h1 className="text-4xl font-medium mb-3">Product Name</h1>
+          <p className="text-gray-500 mb-6">
             Lorem Ipsum is simply dummy text of the printing and typesetting
             industry. Lorem Ipsum has been the industry&apos; s standard dummy
             text ever since the 1500s, when an unknown printer took a galley of
@@ -29,6 +29,42 @@ const SinglePage = () => {
           <div className="mt-2 p-2">
             <CustomizeProducts />
             <div className="h-[2px] bg-gray-100" />
+          </div>
+          <div className="text-sm mt-1 mb-2">
+            <h4 className="text-lg font-medium mb-1">Product Details</h4>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Architecto consectetur explicabo vero aut modi beatae error, iusto
+              ex laborum magni dicta provident dolore adipisci sit, nostrum, eum
+              iure esse obcaecati.
+            </p>
+          </div>
+          <div className="text-sm mt-1 mb-2">
+            <h4 className="text-lg font-medium mb-1">Product Details</h4>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Architecto consectetur explicabo vero aut modi beatae error, iusto
+              ex laborum magni dicta provident dolore adipisci sit, nostrum, eum
+              iure esse obcaecati.
+            </p>
+          </div>
+          <div className="text-sm mt-1 mb-2">
+            <h4 className="text-lg font-medium mb-1">Product Details</h4>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Architecto consectetur explicabo vero aut modi beatae error, iusto
+              ex laborum magni dicta provident dolore adipisci sit, nostrum, eum
+              iure esse obcaecati.
+            </p>
+          </div>
+          <div className="text-sm mt-1 mb-2">
+            <h4 className="text-lg font-medium mb-1">Product Details</h4>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Architecto consectetur explicabo vero aut modi beatae error, iusto
+              ex laborum magni dicta provident dolore adipisci sit, nostrum, eum
+              iure esse obcaecati.
+            </p>
           </div>
         </div>
       </div>
