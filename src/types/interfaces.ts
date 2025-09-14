@@ -77,7 +77,6 @@ export interface Categories {
 
 export interface CategoriesApiResponse {
   success: boolean;
-  data: Product[];
+  data: Categories[];
   message?: string;
-  totalCount?: number;
 }

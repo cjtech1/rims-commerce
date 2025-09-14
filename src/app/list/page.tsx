@@ -1,9 +1,18 @@
+"use client";
 import Card from "@/components/Card";
 import Filter from "@/components/Filter";
 import Image from "next/image";
 import Link from "next/link";
 
-const products = [
+import { Product } from "@/types/interfaces";
+import {
+  FeaturedProductService,
+  ProductError,
+} from "@/lib/services/productService";
+import { error } from "console";
+import { useCallback, useEffect, useState } from "react";
+
+/*const products = [
   {
     id: 1,
     name: "Classic White Sneakers",
@@ -40,9 +49,60 @@ const products = [
     description: "Reusable and stylish bottle to keep you hydrated all day.",
     img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
   },
-];
+];*/
+
+const CardSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+    {Array.from({ length: 4 }).map((_, index) => (
+      <Card key={index} title="Loading..." desc="" price={0} img="" />
+    ))}
+  </div>
+);
+
+const productError = ({
+  error,
+  onRetry,
+}: {
+  error: String;
+  onRetry: () => void;
+}) => <Card title="Error in Loading..." desc="" price={0} img="" />;
 
 const ListPage = () => {
+  const [product, setProduct] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Fetch only active slides with a reasonable limit
+      const ProductData = await FeaturedProductService.getProducts({
+        featured: true,
+        limit: 5,
+      });
+
+      setProduct(ProductData);
+    } catch (err) {
+      console.error("Failed to fetch slides:", err);
+
+      // Provide user-friendly error messages
+      const errorMessage =
+        err instanceof ProductError
+          ? err.message
+          : "Failed to load slider content. Please try again.";
+
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
   return (
     <div className="px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64">
       {/* CAMPAIGN */}
@@ -69,8 +129,8 @@ const ListPage = () => {
           <h2 className="text-xl font-semibold">All Products For You</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products &&
-            products.map((product, index) => (
+          {product &&
+            product.map((product, index) => (
               <Card
                 key={index}
                 title={product.name}

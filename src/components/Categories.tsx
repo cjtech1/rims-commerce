@@ -1,40 +1,27 @@
 "use client";
 
-import { useRef, forwardRef, useImperativeHandle } from "react";
+import {
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import Card from "./Card";
+import { Categories as catg } from "@/types/interfaces";
+import {
+  CategoryError,
+  CategoryServiece,
+} from "@/lib/services/categoryService";
 
-const categories = [
-  {
-    id: 1,
-    title: "Fashion & Apparel",
-    img: "https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: 2,
-    title: "Consumer Electronics",
-    img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: 3,
-    title: "Home & Decor",
-    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: 4,
-    title: "Health & Beauty",
-    img: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: 5,
-    title: "Sports & Outdoors",
-    img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: 6,
-    title: "Books & Media",
-    img: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=600&q=80",
-  },
-];
+const productError = ({
+  error,
+  onRetry,
+}: {
+  error: String;
+  onRetry: () => void;
+}) => <Card title="Error in Loading..." desc="" price={0} img="" />;
 
 export interface CategoriesRef {
   scrollLeft: () => void;
@@ -42,6 +29,31 @@ export interface CategoriesRef {
 }
 
 const Categories = forwardRef<CategoriesRef>((props, ref) => {
+  const [category, setCategory] = useState<catg[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      setError(null);
+      const CategoryData = await CategoryServiece.getCategories();
+      setCategory(CategoryData);
+    } catch (err) {
+      console.error("Failed to fetch slides:", err);
+
+      // Provide user-friendly error messages
+      const errorMessage =
+        err instanceof CategoryError
+          ? err.message
+          : "Failed to load slider content. Please try again.";
+
+      setError(errorMessage);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollLeft = () => {
@@ -80,8 +92,8 @@ const Categories = forwardRef<CategoriesRef>((props, ref) => {
           className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {categories &&
-            categories.map((category, index) => (
+          {category &&
+            category.map((category, index) => (
               <div key={index} className="flex-shrink-0 w-48">
                 <Card
                   title={category.title}
@@ -96,8 +108,8 @@ const Categories = forwardRef<CategoriesRef>((props, ref) => {
 
       {/* Mobile and Tablet: Grid layout */}
       <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        {categories &&
-          categories.map((category, index) => (
+        {category &&
+          category.map((category, index) => (
             <Card
               key={index}
               title={category.title}
