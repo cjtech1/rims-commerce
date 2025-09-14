@@ -21,7 +21,16 @@ const productError = ({
 }: {
   error: String;
   onRetry: () => void;
-}) => <Card title="Error in Loading..." desc="" price={0} img="" />;
+}) => (
+  <Card
+    title="Error in Loading..."
+    desc=""
+    price={0}
+    img=""
+    id={0}
+    category=""
+  />
+);
 
 export interface CategoriesRef {
   scrollLeft: () => void;
@@ -96,10 +105,12 @@ const Categories = forwardRef<CategoriesRef>((props, ref) => {
             category.map((category, index) => (
               <div key={index} className="flex-shrink-0 w-48">
                 <Card
+                  id={category.id}
                   title={category.title}
                   img={category.img}
                   desc=""
                   price={0}
+                  category={category.category}
                 />
               </div>
             ))}
@@ -111,11 +122,13 @@ const Categories = forwardRef<CategoriesRef>((props, ref) => {
         {category &&
           category.map((category, index) => (
             <Card
+              id={category.id}
               key={index}
               title={category.title}
               img={category.img}
               desc=""
               price={0}
+              category={category.category}
             />
           ))}
       </div>

@@ -4,15 +4,23 @@ import Image from "next/image";
 import Link from "next/link";
 
 type CardProps = {
+  id: number;
   title: string;
   desc: string;
   price: number;
   img: string;
+  category?: string;
 };
 
-const Card = ({ title, desc, price, img }: CardProps) => {
+const Card = ({ title, desc, price, img, id, category }: CardProps) => {
   return (
-    <Link href={price != 0 ? "" : "/list"}>
+    <Link
+      href={
+        price != 0
+          ? `/product?id=${id}&category=${category}`
+          : `/list?category=${category}`
+      }
+    >
       <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:scale-[1.02] hover:shadow-md border border-gray-100 h-full">
         <div className="relative w-full aspect-[3/2]">
           <Image

@@ -8,21 +8,22 @@ import {
 import { error } from "console";
 import { useCallback, useEffect, useState } from "react";
 
-const CardSkeleton = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-    {Array.from({ length: 4 }).map((_, index) => (
-      <Card key={index} title="Loading..." desc="" price={0} img="" />
-    ))}
-  </div>
-);
-
 const productError = ({
   error,
   onRetry,
 }: {
   error: String;
   onRetry: () => void;
-}) => <Card title="Error in Loading..." desc="" price={0} img="" />;
+}) => (
+  <Card
+    title="Error in Loading..."
+    desc=""
+    price={0}
+    img=""
+    id={0}
+    category={undefined}
+  />
+);
 
 const ProductList = () => {
   const [product, setProduct] = useState<Product[]>([]);
@@ -37,7 +38,7 @@ const ProductList = () => {
       // Fetch only active slides with a reasonable limit
       const ProductData = await FeaturedProductService.getProducts({
         featured: true,
-        limit: 5,
+        limit: 8,
       });
 
       setProduct(ProductData);
@@ -66,10 +67,12 @@ const ProductList = () => {
         product.map((product, index) => (
           <Card
             key={index}
+            id={product.id}
             title={product.name}
             desc={product.description}
             price={product.price}
             img={product.img}
+            category={product.category}
           />
         ))}
     </div>
