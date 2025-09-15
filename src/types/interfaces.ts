@@ -58,6 +58,8 @@ export interface Product {
   featured: boolean;
   createdAt?: string; // Optional timestamp
   updatedAt?: string; // Optional timestamp
+  slug?: string; // Optional slug for routing
+  images?: string[]; // Optional array of additional images
 }
 
 export interface ProductsApiResponse {
@@ -65,6 +67,12 @@ export interface ProductsApiResponse {
   data: Product[];
   message?: string;
   totalCount?: number;
+}
+
+export interface ProductApiResponse {
+  success: boolean;
+  data: Product;
+  message?: string;
 }
 
 //For Categories

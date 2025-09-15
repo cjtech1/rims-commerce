@@ -10,14 +10,17 @@ type CardProps = {
   price: number;
   img: string;
   category?: string;
+  slug?: string;
 };
 
-const Card = ({ title, desc, price, img, id, category }: CardProps) => {
+const Card = ({ title, desc, price, img, id, category, slug }: CardProps) => {
   return (
     <Link
       href={
         price != 0
-          ? `/product?id=${id}&category=${category}`
+          ? slug
+            ? `/${slug}`
+            : `/product?id=${id}&category=${category}`
           : `/list?category=${category}`
       }
     >

@@ -21,7 +21,8 @@ const productError = ({
     price={0}
     img=""
     id={0}
-    category={undefined}
+    category=""
+    slug=""
   />
 );
 
@@ -73,6 +74,7 @@ const ProductList = () => {
             price={product.price}
             img={product.img}
             category={product.category}
+            slug={product.slug}
           />
         ))}
     </div>

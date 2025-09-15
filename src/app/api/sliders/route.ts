@@ -1,49 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Slide, SliderApiResponse } from "@/types/interfaces";
+import { SliderApiResponse } from "@/types/interfaces";
+import { SliderDataHelpers } from "@/lib/data/sliders";
 
 /**
- * Mock database or data source
- * In a real application, this would come from:
- * - Database (PostgreSQL, MongoDB, etc.)
- * - CMS (Strapi, Sanity, Contentful)
- * - External API
- * - Static files
+ * Using centralized slider data
+ * Single source of truth for all slider information
  */
-const SLIDER_DATA: Slide[] = [
-  {
-    id: 1,
-    title: "Summer Sale Collections",
-    description: "Sale! Up to 50% off on selected fashion trends.",
-    img: "https://images.pexels.com/photos/2983464/pexels-photo-2983464.jpeg?auto=compress&w=600",
-    url: "/collections/summer-sale",
-    bg: "bg-gradient-to-r from-yellow-50 to-pink-50",
-    isActive: true,
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-01-20T15:30:00Z",
-  },
-  {
-    id: 2,
-    title: "New Arrivals: Electronics",
-    description: "Discover the latest gadgets and smart devices.",
-    img: "https://images.pexels.com/photos/3861968/pexels-photo-3861968.jpeg?auto=compress&w=600",
-    url: "/collections/electronics-new",
-    bg: "bg-gradient-to-r from-blue-50 to-purple-50",
-    isActive: true,
-    createdAt: "2024-01-16T12:00:00Z",
-    updatedAt: "2024-01-21T09:15:00Z",
-  },
-  {
-    id: 3,
-    title: "Exclusive Home Decor",
-    description: "Beautify your home with our handcrafted decor pieces.",
-    img: "https://images.pexels.com/photos/1866149/pexels-photo-1866149.jpeg?auto=compress&w=600",
-    url: "/collections/home-decor",
-    bg: "bg-gradient-to-r from-green-50 to-yellow-50",
-    isActive: true,
-    createdAt: "2024-01-17T14:30:00Z",
-    updatedAt: "2024-01-22T11:45:00Z",
-  },
-];
 
 /**
  * GET /api/sliders
@@ -69,22 +31,19 @@ export async function GET(request: NextRequest) {
     // Simulate database query delay (remove in production)
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Filter data based on query parameters
-    let filteredSlides = SLIDER_DATA;
+    // Use centralized data and helper functions
+    let filteredSlides = activeOnly
+      ? SliderDataHelpers.getActiveSliders()
+      : SliderDataHelpers.getAllSliders();
 
-    if (activeOnly) {
-      filteredSlides = filteredSlides.filter((slide) => slide.isActive);
-    }
+    // Sort by creation date (newest first)
+    filteredSlides = SliderDataHelpers.getSlidersSortedByDate().filter(
+      (slide) => (activeOnly ? slide.isActive : true)
+    );
 
     if (limit && limit > 0) {
       filteredSlides = filteredSlides.slice(0, limit);
     }
-
-    // Sort by creation date (newest first) - industry practice
-    filteredSlides.sort(
-      (a, b) =>
-        new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
-    );
 
     // Return success response following REST API conventions
     const response: SliderApiResponse = {

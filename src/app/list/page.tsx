@@ -62,6 +62,7 @@ const CardSkeleton = () => (
         img=""
         id={0}
         category=""
+        slug=""
       />
     ))}
   </div>
@@ -81,6 +82,7 @@ const productError = ({
     img=""
     id={0}
     category=""
+    slug=""
   />
 );
 
@@ -155,6 +157,7 @@ const ListPage = () => {
                 price={product.price}
                 img={product.img}
                 category={product.category}
+                slug={product.slug}
               />
             ))}
         </div>
