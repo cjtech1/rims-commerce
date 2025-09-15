@@ -95,10 +95,21 @@ const ListPage = () => {
     try {
       setIsLoading(true);
       setError(null);
+      let queryCategory;
+
+      const url = window.location.href;
+      const urlObj = new URL(url);
+
+      const queryParams = new URLSearchParams(urlObj.search);
+      if (queryParams.get("category")) {
+        queryCategory = queryParams.get("category");
+      }
 
       // Fetch only active slides with a reasonable limit
       const ProductData = await FeaturedProductService.getProducts({
-        limit: 10,
+        // limit: 10,
+        featured: false,
+        category: queryCategory ? queryCategory : undefined,
       });
 
       setProduct(ProductData);

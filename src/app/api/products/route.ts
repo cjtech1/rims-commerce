@@ -1,6 +1,7 @@
 import { ProductsApiResponse } from "@/types/interfaces";
 import { PRODUCTS_DATA, ProductDataHelpers } from "@/lib/data/products";
 import { NextRequest, NextResponse } from "next/server";
+import { setRequestMeta } from "next/dist/server/request-meta";
 
 // Using centralized product data - no need for local array
 
@@ -11,6 +12,9 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get("limit")
       ? parseInt(searchParams.get("limit")!)
       : undefined;
+    const category = searchParams.get("category")
+      ? searchParams.get("category")?.toString()
+      : undefined;
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Use centralized product data and helper functions
@@ -18,17 +22,16 @@ export async function GET(request: NextRequest) {
       ? ProductDataHelpers.getFeaturedProducts()
       : ProductDataHelpers.getAllProducts();
 
-    // Apply limit if specified
-    if (limit && limit > 0) {
-      products = ProductDataHelpers.getProductsWithLimit(limit);
-      if (featuredOnly) {
-        products = products.filter((product) => product.featured);
-      }
+    if (category) {
+      products = products.filter((product) => product.category === category);
     }
-
+    if (featuredOnly) {
+      products = products.filter((product) => product.featured);
+    }
     // Sort by creation date (newest first)
-    products = ProductDataHelpers.getProductsSortedByDate().filter((product) =>
-      featuredOnly ? product.featured : true
+    products = products.sort(
+      (a, b) =>
+        new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
     );
 
     if (limit && limit > 0) {
