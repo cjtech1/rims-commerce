@@ -15,17 +15,19 @@ type CardProps = {
 
 const Card = ({ title, desc, price, img, id, category, slug }: CardProps) => {
   return (
-    <Link
-      href={
-        price != 0
-          ? slug
-            ? `/${slug}`
-            : `/product?id=${id}&category=${category}`
-          : `/list?category=${category}`
-      }
-    >
+    <div>
       <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:scale-[1.02] hover:shadow-md border border-gray-100 h-full">
-        <div className="relative w-full aspect-[3/2]">
+        <div
+          className="relative w-full aspect-[3/2] cursor-pointer"
+          onClick={() => {
+            window.location.href =
+              price != 0
+                ? slug
+                  ? `/${slug}`
+                  : `/product?id=${id}&category=${category}`
+                : `/list?category=${category}`;
+          }}
+        >
           <Image
             src={img}
             alt={title}
@@ -62,7 +64,7 @@ const Card = ({ title, desc, price, img, id, category, slug }: CardProps) => {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 

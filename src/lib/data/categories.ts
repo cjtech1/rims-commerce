@@ -21,13 +21,13 @@ export const CATEGORIES_DATA: Categories[] = [
     id: 3,
     title: "Home & Kitchen",
     img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
-    category: "Home & Kitchen",
+    category: "Home&Kitchen",
   },
   {
     id: 4,
     title: "Health & Beauty",
     img: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=600&q=80",
-    category: "Health & Beauty",
+    category: "Health&Beauty",
   },
   {
     id: 5,
