@@ -769,6 +769,12 @@ export const ProductDataHelpers = {
       (product) => product.category.toLowerCase() === category.toLowerCase()
     ),
 
+  //Get products by name
+  getProductsByName: (name: string): Product[] =>
+    PRODUCTS_DATA.filter((product) =>
+      product.name.toLowerCase().includes(name.toLowerCase())
+    ),
+
   // Get featured products
   getFeaturedProducts: (): Product[] =>
     PRODUCTS_DATA.filter((product) => product.featured),

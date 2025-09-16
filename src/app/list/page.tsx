@@ -3,14 +3,14 @@ import Card from "@/components/Card";
 import Filter from "@/components/Filter";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import { Product } from "@/types/interfaces";
 import {
   FeaturedProductService,
   ProductError,
 } from "@/lib/services/productService";
-import { error } from "console";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 /*const products = [
   {
@@ -87,50 +87,44 @@ const productError = ({
 );
 
 const ListPage = () => {
-  const [product, setProduct] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      let queryCategory;
+  const category = searchParams.get("category") || undefined;
+  const name = searchParams.get("name") || undefined;
 
-      const url = window.location.href;
-      const urlObj = new URL(url);
+  const fetchProducts = useCallback(
+    async (category?: string, name?: string) => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      const queryParams = new URLSearchParams(urlObj.search);
-      if (queryParams.get("category")) {
-        queryCategory = queryParams.get("category");
+        const productData = await FeaturedProductService.getProducts({
+          featured: false,
+          category,
+          name,
+        });
+        setProducts(productData);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+        const errorMessage =
+          err instanceof ProductError
+            ? err.message
+            : "Failed to load products. Please try again.";
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
       }
+    },
+    []
+  );
 
-      // Fetch only active slides with a reasonable limit
-      const ProductData = await FeaturedProductService.getProducts({
-        // limit: 10,
-        featured: false,
-        category: queryCategory ? queryCategory : undefined,
-      });
-
-      setProduct(ProductData);
-    } catch (err) {
-      console.error("Failed to fetch slides:", err);
-
-      // Provide user-friendly error messages
-      const errorMessage =
-        err instanceof ProductError
-          ? err.message
-          : "Failed to load slider content. Please try again.";
-
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
+  // Refetch whenever the search params change
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    fetchProducts(category, name);
+  }, [fetchProducts, category, name]);
 
   return (
     <div className="px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64">
@@ -157,21 +151,42 @@ const ListPage = () => {
         <div>
           <h2 className="text-xl font-semibold">All Products For You</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {product &&
-            product.map((product, index) => (
-              <Card
-                key={index}
-                id={product.id}
-                title={product.name}
-                desc={product.description}
-                price={product.price}
-                img={product.img}
-                category={product.category}
-                slug={product.slug}
-              />
-            ))}
-        </div>
+        {isLoading && (
+          <div className="opacity-60">
+            <p>Loading products...</p>
+          </div>
+        )}
+        {error && !isLoading && (
+          <div className="text-red-500 text-sm">{error}</div>
+        )}
+        {!isLoading && !error && (
+          <>
+            {name && (
+              <p className="text-sm text-gray-500">
+                Search results for: <span className="font-medium">{name}</span>
+              </p>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {products.map((product) => (
+                <Card
+                  key={product.id}
+                  id={product.id}
+                  title={product.name}
+                  desc={product.description}
+                  price={product.price}
+                  img={product.img}
+                  category={product.category}
+                  slug={product.slug}
+                />
+              ))}
+              {products.length === 0 && (
+                <div className="col-span-full text-sm text-gray-500">
+                  No products found.
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

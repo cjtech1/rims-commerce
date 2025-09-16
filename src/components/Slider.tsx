@@ -150,10 +150,6 @@ const Slider = () => {
             prev === slides.length - 1 ? 0 : prev + 1
           );
           break;
-        case " ": // Spacebar to pause/resume
-          event.preventDefault();
-          setIsPaused((prev) => !prev);
-          break;
       }
     };
 

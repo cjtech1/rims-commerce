@@ -13,8 +13,12 @@ export async function GET(request: NextRequest) {
       ? parseInt(searchParams.get("limit")!)
       : undefined;
     const category = searchParams.get("category")
-      ? searchParams.get("category")?.toString()
+      ? searchParams.get("category")
       : undefined;
+    const name = searchParams.get("name")
+      ? searchParams.get("name")
+      : undefined;
+
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Use centralized product data and helper functions
@@ -33,6 +37,8 @@ export async function GET(request: NextRequest) {
       (a, b) =>
         new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
     );
+
+    if (name) products = ProductDataHelpers.getProductsByName(name);
 
     if (limit && limit > 0) {
       products = products.slice(0, limit);

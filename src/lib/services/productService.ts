@@ -21,7 +21,12 @@ export class ProductError extends Error {
 
 export class FeaturedProductService {
   static async getProducts(
-    options: { featured?: boolean; limit?: number; category?: string } = {}
+    options: {
+      featured?: boolean;
+      limit?: number;
+      category?: string;
+      name?: string;
+    } = {}
   ): Promise<Product[]> {
     try {
       const queryParams = new URLSearchParams();
@@ -37,7 +42,9 @@ export class FeaturedProductService {
         queryParams.set("category", options.category);
       }
 
-      console.log(options.category);
+      if (options.name !== undefined) {
+        queryParams.set("name", options.name);
+      }
 
       const queryString = queryParams.toString();
       const url = `/api/products${queryString ? `?${queryString}` : ""}`;
