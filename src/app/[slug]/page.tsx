@@ -30,7 +30,8 @@ async function getProduct(slug: string): Promise<Product | null> {
   }
 }
 
-const SinglePage = async ({ params }: { params: { slug: string } }) => {
+const SinglePage = async (props: { params: Promise<{ slug: string }> }) => {
+  const params = await props.params;
   const product = await getProduct(params.slug);
 
   if (!product) {

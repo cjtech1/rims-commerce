@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SliderApiResponse } from "@/types/interfaces";
-import { SliderDataHelpers } from "@/lib/data/sliders";
+import { SliderService } from "@/lib/services/sliderService";
 
 /**
  * Using centralized slider data
@@ -28,29 +28,15 @@ export async function GET(request: NextRequest) {
       ? parseInt(searchParams.get("limit")!)
       : undefined;
 
-    // Simulate database query delay (remove in production)
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    // Use centralized data and helper functions
-    let filteredSlides = activeOnly
-      ? SliderDataHelpers.getActiveSliders()
-      : SliderDataHelpers.getAllSliders();
-
-    // Sort by creation date (newest first)
-    filteredSlides = SliderDataHelpers.getSlidersSortedByDate().filter(
-      (slide) => (activeOnly ? slide.isActive : true)
-    );
-
-    if (limit && limit > 0) {
-      filteredSlides = filteredSlides.slice(0, limit);
-    }
+    // Fetch sliders from database using the service
+    const sliders = await SliderService.getAllSliders(activeOnly, limit);
 
     // Return success response following REST API conventions
     const response: SliderApiResponse = {
       success: true,
-      data: filteredSlides,
+      data: sliders,
       message: "Sliders fetched successfully",
-      totalCount: filteredSlides.length,
+      totalCount: sliders.length,
     };
 
     return NextResponse.json(response, {
@@ -100,17 +86,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // In a real app, you would:
-    // 1. Validate user authentication
-    // 2. Sanitize input data
-    // 3. Save to database
-    // 4. Return the created resource
+    // Create slider in database
+    const newSlider = await SliderService.createSlider({
+      title: body.title,
+      description: body.description,
+      img: body.img,
+      url: body.url,
+      bg: body.bg || "bg-gradient-to-r from-gray-50 to-gray-100",
+      isActive: body.isActive !== undefined ? body.isActive : true,
+    });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Slider created successfully (mock)",
-        data: { id: Date.now(), ...body },
+        message: "Slider created successfully",
+        data: newSlider,
       },
       { status: 201 }
     );

@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import { Slide } from "@/types/interfaces";
 import {
-  SliderService,
-  SliderServiceError,
-} from "@/lib/services/sliderService";
+  SliderApiService,
+  SliderApiError,
+} from "@/lib/services/sliderApiService";
 import { cn } from "@/lib/utils";
 
 /**
@@ -85,7 +85,7 @@ const Slider = () => {
       setError(null);
 
       // Fetch only active slides with a reasonable limit
-      const slidesData = await SliderService.getSliders({
+      const slidesData = await SliderApiService.getSliders({
         activeOnly: true,
         limit: 5,
       });
@@ -101,7 +101,7 @@ const Slider = () => {
 
       // Provide user-friendly error messages
       const errorMessage =
-        err instanceof SliderServiceError
+        err instanceof SliderApiError
           ? err.message
           : "Failed to load slider content. Please try again.";
 

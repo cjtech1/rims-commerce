@@ -1,29 +1,21 @@
-import { Slide, SliderApiResponse, ApiError } from "@/types/interfaces";
+import { query } from "@/lib/db";
+import { Slide } from "@/types/interfaces";
 
 /**
- * Service layer for slider-related API calls
+ * SERVER-SIDE ONLY DATABASE SERVICE
  *
- * This abstraction provides several benefits:
- * 1. Centralized API logic
- * 2. Easy testing and mocking
- * 3. Consistent error handling
- * 4. Type safety
- * 5. Reusable across components
+ * ⚠️  WARNING: This service contains Node.js modules and database connections.
+ * It should ONLY be used in:
+ * - API routes (/app/api/*)
+ * - Server components
+ * - Server actions
+ *
+ * DO NOT import this in client components (components with "use client")
+ * Use SliderApiService instead for client-side operations.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
-
 /**
- * Configuration for API requests
- */
-const DEFAULT_CONFIG: RequestInit = {
-  headers: {
-    "Content-Type": "application/json",
-  },
-};
-
-/**
- * Custom error class for API-related errors
+ * Custom error class for database-related errors
  */
 export class SliderServiceError extends Error {
   constructor(
@@ -37,86 +29,59 @@ export class SliderServiceError extends Error {
 }
 
 /**
- * Slider Service Class
- * Contains all slider-related API operations
+ * Database service for slider operations
  */
 export class SliderService {
   /**
-   * Fetches all active sliders from the API
-   *
-   * @param options - Query options for filtering
-   * @returns Promise<Slide[]> - Array of slide objects
-   * @throws SliderServiceError - When API request fails
+   * Get all sliders from database
+   * @param activeOnly - Filter only active sliders
+   * @param limit - Limit number of results
+   * @returns Array of sliders
    */
-  static async getSliders(
-    options: {
-      activeOnly?: boolean;
-      limit?: number;
-    } = {}
+  static async getAllSliders(
+    activeOnly: boolean = false,
+    limit?: number
   ): Promise<Slide[]> {
     try {
-      // Build query parameters
-      const queryParams = new URLSearchParams();
+      let queryText = `
+        SELECT 
+          id,
+          title,
+          description,
+          image_url as img,
+          link_url as url,
+          background_class as bg,
+          is_active as "isActive",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM sliders
+      `;
 
-      if (options.activeOnly !== undefined) {
-        queryParams.set("active", options.activeOnly.toString());
+      const params: any[] = [];
+      const conditions: string[] = [];
+
+      if (activeOnly) {
+        conditions.push("is_active = $1");
+        params.push(true);
       }
 
-      if (options.limit !== undefined) {
-        queryParams.set("limit", options.limit.toString());
+      if (conditions.length > 0) {
+        queryText += ` WHERE ${conditions.join(" AND ")}`;
       }
 
-      const queryString = queryParams.toString();
-      const url = `/api/sliders${queryString ? `?${queryString}` : ""}`;
+      queryText += " ORDER BY sort_order ASC, created_at DESC";
 
-      // Make API request with proper error handling
-      const response = await fetch(url, {
-        ...DEFAULT_CONFIG,
-        method: "GET",
-        // Add cache configuration for better performance
-        next: {
-          revalidate: 300, // Revalidate every 5 minutes
-        },
-      });
-
-      // Check if response is ok
-      if (!response.ok) {
-        throw new SliderServiceError(
-          `Failed to fetch sliders: ${response.status} ${response.statusText}`,
-          response.status
-        );
+      if (limit && limit > 0) {
+        queryText += ` LIMIT $${params.length + 1}`;
+        params.push(limit);
       }
 
-      const data: SliderApiResponse = await response.json();
-
-      // Handle API-level errors
-      if (!data.success) {
-        const errorData = data as unknown as ApiError;
-        throw new SliderServiceError(
-          errorData.message || "Unknown API error",
-          errorData.statusCode || response.status
-        );
-      }
-
-      return data.data;
+      const result = await query(queryText, params);
+      return result.rows;
     } catch (error) {
-      // Re-throw SliderServiceError as-is
-      if (error instanceof SliderServiceError) {
-        throw error;
-      }
-
-      // Handle network or other errors
-      if (error instanceof TypeError) {
-        throw new SliderServiceError(
-          "Network error: Please check your connection",
-          0,
-          error
-        );
-      }
-
-      // Handle JSON parsing errors
+      console.error("Error fetching sliders from database:", error);
       throw new SliderServiceError(
-        "Failed to process server response",
+        "Failed to fetch sliders from database",
         500,
         error
       );
@@ -124,45 +89,152 @@ export class SliderService {
   }
 
   /**
-   * Creates a new slider (for future admin functionality)
-   *
-   * @param sliderData - Partial slider data to create
-   * @returns Promise<Slide> - Created slider object
+   * Get slider by ID from database
+   * @param id - Slider ID
+   * @returns Slider or null if not found
+   */
+  static async getSliderById(id: number): Promise<Slide | null> {
+    try {
+      const queryText = `
+        SELECT 
+          id,
+          title,
+          description,
+          image_url as img,
+          link_url as url,
+          background_class as bg,
+          is_active as "isActive",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM sliders
+        WHERE id = $1
+      `;
+
+      const result = await query(queryText, [id]);
+      return result.rows.length > 0 ? result.rows[0] : null;
+    } catch (error) {
+      console.error("Error fetching slider by ID from database:", error);
+      throw new SliderServiceError(
+        "Failed to fetch slider from database",
+        500,
+        error
+      );
+    }
+  }
+
+  /**
+   * Get active sliders from database
+   * @returns Array of active sliders
+   */
+  static async getActiveSliders(): Promise<Slide[]> {
+    return await this.getAllSliders(true);
+  }
+
+  /**
+   * Get sliders sorted by date (newest first)
+   * @param activeOnly - Filter only active sliders
+   * @returns Array of sliders sorted by creation date
+   */
+  static async getSlidersSortedByDate(
+    activeOnly: boolean = false
+  ): Promise<Slide[]> {
+    try {
+      let queryText = `
+        SELECT 
+          id,
+          title,
+          description,
+          image_url as img,
+          link_url as url,
+          background_class as bg,
+          is_active as "isActive",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM sliders
+      `;
+
+      const params: any[] = [];
+
+      if (activeOnly) {
+        queryText += " WHERE is_active = $1";
+        params.push(true);
+      }
+
+      queryText += " ORDER BY created_at DESC";
+
+      const result = await query(queryText, params);
+      return result.rows;
+    } catch (error) {
+      console.error(
+        "Error fetching sliders sorted by date from database:",
+        error
+      );
+      throw new SliderServiceError(
+        "Failed to fetch sliders from database",
+        500,
+        error
+      );
+    }
+  }
+
+  /**
+   * Create a new slider (for future use)
+   * @param sliderData - Slider data to insert
+   * @returns Created slider
    */
   static async createSlider(
     sliderData: Omit<Slide, "id" | "createdAt" | "updatedAt">
   ): Promise<Slide> {
     try {
-      const response = await fetch("/api/sliders", {
-        ...DEFAULT_CONFIG,
-        method: "POST",
-        body: JSON.stringify(sliderData),
-      });
+      const queryText = `
+        INSERT INTO sliders (title, description, image_url, link_url, background_class, is_active, sort_order)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING 
+          id,
+          title,
+          description,
+          image_url as img,
+          link_url as url,
+          background_class as bg,
+          is_active as "isActive",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+      `;
 
-      if (!response.ok) {
-        throw new SliderServiceError(
-          `Failed to create slider: ${response.status} ${response.statusText}`,
-          response.status
-        );
-      }
+      const params = [
+        sliderData.title,
+        sliderData.description,
+        sliderData.img,
+        sliderData.url,
+        sliderData.bg,
+        sliderData.isActive,
+        0, // default sort_order
+      ];
 
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new SliderServiceError(
-          data.message || "Failed to create slider",
-          data.statusCode || response.status
-        );
-      }
-
-      return data.data;
+      const result = await query(queryText, params);
+      return result.rows[0];
     } catch (error) {
-      if (error instanceof SliderServiceError) {
-        throw error;
-      }
-
-      throw new SliderServiceError("Failed to create slider", 500, error);
+      console.error("Error creating slider in database:", error);
+      throw new SliderServiceError(
+        "Failed to create slider in database",
+        500,
+        error
+      );
     }
+  }
+
+  /**
+   * Legacy method for compatibility with existing frontend code
+   * @param options - Query options for filtering
+   * @returns Array of sliders
+   */
+  static async getSliders(
+    options: {
+      activeOnly?: boolean;
+      limit?: number;
+    } = {}
+  ): Promise<Slide[]> {
+    return await this.getAllSliders(options.activeOnly || false, options.limit);
   }
 }
 
