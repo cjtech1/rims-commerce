@@ -13,7 +13,7 @@ import { Categories as catg } from "@/types/interfaces";
 import {
   CategoryError,
   CategoryServiece,
-} from "@/lib/services/categoryService";
+} from "@/lib/services/categoryApiService";
 
 const productError = ({
   error,

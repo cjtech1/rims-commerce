@@ -27,7 +27,9 @@ export async function GET(request: NextRequest) {
       : ProductDataHelpers.getAllProducts();
 
     if (category) {
-      products = products.filter((product) => product.category === category);
+      products = products.filter(
+        (product) => product.category.toLowerCase() === category.toLowerCase()
+      );
     }
     if (featuredOnly) {
       products = products.filter((product) => product.featured);

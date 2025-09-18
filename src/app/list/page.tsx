@@ -103,8 +103,8 @@ const ListPage = () => {
 
         const productData = await FeaturedProductService.getProducts({
           featured: false,
-          category,
-          name,
+          ...(category && { category }),
+          ...(name && { name }),
         });
         setProducts(productData);
       } catch (err) {
@@ -176,7 +176,7 @@ const ListPage = () => {
                   price={product.price}
                   img={product.img}
                   category={product.category}
-                  slug={product.slug}
+                  slug={product.slug || ""}
                 />
               ))}
               {products.length === 0 && (

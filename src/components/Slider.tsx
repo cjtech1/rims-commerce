@@ -97,7 +97,7 @@ const Slider = () => {
         setCurrentSlide(0);
       }
     } catch (err) {
-      console.error("Failed to fetch slides:", err);
+      console.log("Failed to fetch slides:", err);
 
       // Provide user-friendly error messages
       const errorMessage =

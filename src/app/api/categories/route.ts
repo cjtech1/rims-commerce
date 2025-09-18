@@ -1,13 +1,14 @@
 import { CategoriesApiResponse } from "@/types/interfaces";
 import { CategoryDataHelpers } from "@/lib/data/categories";
 import { NextRequest, NextResponse } from "next/server";
+import { CategoryService } from "@/lib/services/categoryService";
 
 export async function GET(request: NextRequest) {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    const categories = await CategoryService.getAllCategories();
     const response: CategoriesApiResponse = {
       success: true,
-      data: CategoryDataHelpers.getAllCategories(),
+      data: categories,
       message: "Categories fetched successfully",
     };
 
@@ -19,7 +20,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.log("Error in fetching Categories", error);
     return NextResponse.json(
       {
         success: false,
