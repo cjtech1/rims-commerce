@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ProductDataHelpers } from "@/lib/data/products";
+import { ProductService } from "@/lib/services/productService";
 
 // Using centralized product data
 
-export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+export async function GET(
+  request: NextRequest,
+  props: { params: Promise<{ slug: string }> }
+) {
   const params = await props.params;
   try {
     const { slug } = params;
 
     // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    // await new Promise((resolve) => setTimeout(resolve, 200));
 
     // Find product by slug using centralized data helper
-    const product = ProductDataHelpers.getProductBySlug(slug);
+    const product = await ProductService.getProductBySlug(slug);
 
     if (!product) {
       return NextResponse.json(

@@ -85,10 +85,9 @@ const SinglePage = async (props: { params: Promise<{ slug: string }> }) => {
           <div className="text-sm mt-1 mb-2">
             <h4 className="text-lg font-medium mb-1">Product Details</h4>
             <p className="text-gray-600">
-              This high-quality {product.name.toLowerCase()} is carefully
-              selected to meet our strict quality standards. Perfect for those
-              who appreciate premium products with excellent craftsmanship and
-              attention to detail.
+              This high-quality {product.name} is carefully selected to meet our
+              strict quality standards. Perfect for those who appreciate premium
+              products with excellent craftsmanship and attention to detail.
             </p>
           </div>
           <div className="text-sm mt-1 mb-2">

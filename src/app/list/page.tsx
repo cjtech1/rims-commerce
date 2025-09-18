@@ -102,7 +102,6 @@ const ListPage = () => {
         setError(null);
 
         const productData = await FeaturedProductService.getProducts({
-          featured: false,
           ...(category && { category }),
           ...(name && { name }),
         });
