@@ -1,98 +1,121 @@
-import { Product, ProductsApiResponse, ApiError } from "@/types/interfaces";
+import { Product } from "@/types/interfaces";
+import { query } from "../db";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
-
-const DEFAULT_CONFIG: RequestInit = {
-  headers: {
-    "Content-Type": "application/json",
-  },
-};
-
-export class ProductError extends Error {
+export class ProductServiceError extends Error {
   constructor(
     message: string,
     public statusCode: number,
     public originalError?: unknown
   ) {
     super(message);
-    this.name = "FeaturedProductError";
+    this.name = "ProductService error";
   }
 }
 
-export class FeaturedProductService {
-  static async getProducts(
-    options: {
-      featured?: boolean;
-      limit?: number;
-      category?: string;
-      name?: string;
-    } = {}
-  ): Promise<Product[]> {
+export class ProductService {
+  static async getFeaturedProducts(): Promise<Product[]> {
     try {
-      const queryParams = new URLSearchParams();
-
-      if (options.featured !== undefined) {
-        queryParams.set("featured", options.featured.toString());
-      }
-      if (options.limit !== undefined) {
-        queryParams.set("limit", options.limit.toString());
-      }
-
-      if (options.category !== undefined) {
-        queryParams.set("category", options.category);
-      }
-
-      if (options.name !== undefined) {
-        queryParams.set("name", options.name);
-      }
-
-      const queryString = queryParams.toString();
-      const url = `/api/products${queryString ? `?${queryString}` : ""}`;
-
-      const response = await fetch(url, {
-        ...DEFAULT_CONFIG,
-        method: "GET",
-        next: {
-          revalidate: 300,
-        },
-      });
-
-      if (!response.ok) {
-        throw new ProductError(
-          `Failed to fetch products: ${response.status} ${response.statusText}`,
-          response.status
-        );
-      }
-
-      const data: ProductsApiResponse = await response.json();
-
-      if (!data.success) {
-        const errorData = data as unknown as ApiError;
-        throw new ProductError(
-          errorData.message || "Unknown API error",
-          errorData.statusCode || response.status
-        );
-      }
-
-      return data.data;
+      const queryText = `
+        SELECT 
+          p.id as id,
+          p.name as name,
+          p.slug as slug,
+          p.description as description,
+          p.price as price,
+          p.in_stock as "inStock",
+          p.featured as featured,
+          p.created_at as "createdAt",
+          p.updated_at as "updatedAt",
+          c.name as category,
+          pi.image_url as img
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+        LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.sort_order = 0
+        WHERE p.in_stock = true AND p.featured = true
+        ORDER BY p.created_at DESC
+        LIMIT 8
+      `;
+      const result = await query(queryText);
+      return result.rows;
     } catch (error) {
-      if (error instanceof ProductError) {
-        throw error;
-      }
+      throw new ProductServiceError(
+        "Failed to fetch featured products from database",
+        500,
+        error
+      );
+    }
+  }
 
-      // Handle network or other errors
-      if (error instanceof TypeError) {
-        throw new ProductError(
-          "Network error: Please check your connection",
-          0,
-          error
-        );
-      }
-
-      // Handle JSON parsing errors
-      throw new ProductError("Failed to process server response", 500, error);
+  static async getProductByCategory(category: string): Promise<Product[]> {
+    try {
+      const queryText = `
+      SELECT 
+      p.id as id,
+      p.name as name,
+      p.slug as slug,
+      p.description as description,
+      p.price as price,
+      p.in_stock as "inStock",
+      p.featured as featured,
+      p.created_at as "createdAt",
+      p.updated_at as "updatedAt",
+      c.name as category,
+      pi.image_url as img,
+      COALESCE(
+        ARRAY_AGG(pi2.image_url ORDER BY pi2.sort_order) FILTER (WHERE pi2.image_url IS NOT NULL),
+        ARRAY[]::text[]
+      ) as images
+    FROM products p
+    JOIN categories c ON p.category_id = c.id
+    LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.sort_order = 0
+    LEFT JOIN product_images pi2 ON p.id = pi2.product_id
+    WHERE c.slug = $1
+    GROUP BY p.id, c.name, pi.image_url
+      `;
+      const result = await query(queryText, [category]);
+      return result.rows;
+    } catch (error) {
+      throw new ProductServiceError(
+        "Failed to fetch product from database",
+        500,
+        error
+      );
+    }
+  }
+  static async getProductByName(name: string): Promise<Product[]> {
+    try {
+      const queryText = `
+      SELECT 
+      p.id as id,
+      p.name as name,
+      p.slug as slug,
+      p.description as description,
+      p.price as price,
+      p.in_stock as "inStock",
+      p.featured as featured,
+      p.created_at as "createdAt",
+      p.updated_at as "updatedAt",
+      c.name as category,
+      pi.image_url as img,
+      COALESCE(
+        ARRAY_AGG(pi2.image_url ORDER BY pi2.sort_order) FILTER (WHERE pi2.image_url IS NOT NULL),
+        ARRAY[]::text[]
+      ) as images
+    FROM products p
+    JOIN categories c ON p.category_id = c.id
+    LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.sort_order = 0
+    LEFT JOIN product_images pi2 ON p.id = pi2.product_id
+    WHERE p.name ILIKE '%' || $1 || '%'
+    GROUP BY p.id, c.name, pi.image_url
+      `;
+      const result = await query(queryText, [name]);
+      return result.rows;
+    } catch (error) {
+      throw new ProductServiceError(
+        "Failed to fetch product from database",
+        500,
+        error
+      );
     }
   }
 }
-
-// Create new slider service same as sliderService.ts

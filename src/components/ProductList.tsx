@@ -4,7 +4,7 @@ import { Product } from "@/types/interfaces";
 import {
   FeaturedProductService,
   ProductError,
-} from "@/lib/services/productService";
+} from "@/lib/services/productApiService";
 import { error } from "console";
 import { useCallback, useEffect, useState } from "react";
 
@@ -38,7 +38,6 @@ const ProductList = () => {
 
       // Fetch only active slides with a reasonable limit
       const ProductData = await FeaturedProductService.getProducts({
-        featured: true,
         limit: 8,
       });
 
@@ -74,7 +73,7 @@ const ProductList = () => {
             price={product.price}
             img={product.img}
             category={product.category}
-            slug={product.slug}
+            slug={product.slug || ""}
           />
         ))}
     </div>

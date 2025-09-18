@@ -9,7 +9,7 @@ import { Product } from "@/types/interfaces";
 import {
   FeaturedProductService,
   ProductError,
-} from "@/lib/services/productService";
+} from "@/lib/services/productApiService";
 import { useEffect, useState, useCallback } from "react";
 
 /*const products = [

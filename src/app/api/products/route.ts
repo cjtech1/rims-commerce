@@ -1,14 +1,12 @@
 import { ProductsApiResponse } from "@/types/interfaces";
-import { PRODUCTS_DATA, ProductDataHelpers } from "@/lib/data/products";
 import { NextRequest, NextResponse } from "next/server";
-import { setRequestMeta } from "next/dist/server/request-meta";
+import { ProductService } from "@/lib/services/productService";
 
 // Using centralized product data - no need for local array
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const featuredOnly = searchParams.get("featured") === "true";
     const limit = searchParams.get("limit")
       ? parseInt(searchParams.get("limit")!)
       : undefined;
@@ -19,32 +17,25 @@ export async function GET(request: NextRequest) {
       ? searchParams.get("name")
       : undefined;
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    // Use centralized product data and helper functions
-    let products = featuredOnly
-      ? ProductDataHelpers.getFeaturedProducts()
-      : ProductDataHelpers.getAllProducts();
+    let products = await ProductService.getFeaturedProducts();
 
     if (category) {
-      products = products.filter(
-        (product) => product.category.toLowerCase() === category.toLowerCase()
-      );
+      products = await ProductService.getProductByCategory(category);
     }
-    if (featuredOnly) {
-      products = products.filter((product) => product.featured);
+
+    if (name) {
+      products = await ProductService.getProductByName(name);
     }
+
     // Sort by creation date (newest first)
-    products = products.sort(
-      (a, b) =>
-        new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
-    );
+    // products = products.sort(
+    //   (a, b) =>
+    //     new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
+    // );
 
-    if (name) products = ProductDataHelpers.getProductsByName(name);
-
-    if (limit && limit > 0) {
-      products = products.slice(0, limit);
-    }
+    // if (limit && limit > 0) {
+    //   products = products.slice(0, limit);
+    // }
 
     const response: ProductsApiResponse = {
       success: true,
