@@ -6,6 +6,11 @@ import { useState } from "react";
 import CartModal from "./CartModal";
 
 const NavBarIcons = () => {
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    location.assign("/");
+  }
+
   const [profile, setProfile] = useState(false);
   const [notification, setNotification] = useState(false);
   const [cart, setCart] = useState(false);
@@ -20,9 +25,11 @@ const NavBarIcons = () => {
         onClick={() => setProfile((prev) => !prev)}
       />
       {profile && (
-        <div className="flex flex-col gap-2 absolute top-8 z-20 shadow-md p-2 rounded-md text-sm">
+        <div className="flex flex-col gap-2 absolute top-8 z-20 shadow-md p-2 rounded-md text-sm bg-white">
           <Link href="/">Profile</Link>
-          <div className="cursor-pointer">Log Out</div>
+          <div className="cursor-pointer" onClick={logout}>
+            Log Out
+          </div>
         </div>
       )}
       <Image
